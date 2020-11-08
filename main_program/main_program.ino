@@ -1,6 +1,6 @@
 #include<Adafruit_MotorShield.h>
 
-#include<line_following.h>
+#include "line_following.h"
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 
@@ -24,7 +24,7 @@ void loop() {
   long end = start;
 
   while((end - start) < 1000){
-    line_following();
+    line_following(left_motor,right_motor);
     end = millis();
   }
 

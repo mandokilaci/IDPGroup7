@@ -1,11 +1,11 @@
 int left_sensor_value = 0;
-int reight_sensor_value = 0;
+int right_sensor_value = 0;
 
 //pins
 int left_sensor = A1;
 int right_sensor = A2;
 
-void line_following(void){
+void line_following(Adafruit_DCMotor *left_motor,Adafruit_DCMotor *right_motor){
 
 left_motor -> setSpeed(100);
 right_motor -> setSpeed(100);
