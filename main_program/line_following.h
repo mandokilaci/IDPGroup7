@@ -1,11 +1,13 @@
 int left_sensor_value = 0;
-int reight_sensor_value = 0;
+int right_sensor_value = 0;
 
 //pins
 int left_sensor = A1;
 int right_sensor = A2;
 
-void line_following(void){
+
+
+void line_following(Adafruit_DCMotor *left_motor,Adafruit_DCMotor *right_motor, int yellow, int red){
 
 left_motor -> setSpeed(100);
 right_motor -> setSpeed(100);
@@ -19,7 +21,9 @@ Serial.print(left_sensor_value);
 Serial.print("right sensor value:");
 Serial.print(right_sensor_value);
 
-if(left_sensor_value > 500 && right_sensor_value < 300){
+/*if(left_sensor_value > 500 && right_sensor_value < 300){
+    digitalWrite(yellow, HIGH);
+    digitalWrite(red, HIGH);
     left_motor -> setSpeed(100);
     right_motor -> setSpeed(100);
 
@@ -29,7 +33,9 @@ if(left_sensor_value > 500 && right_sensor_value < 300){
     Serial.println("straight");
 }
 
-else if(left_sensor_value < 300 && right_sensor_value > 500){
+else*/ if(left_sensor_value < 300 && right_sensor_value > 500){
+      digitalWrite(yellow, HIGH);
+    digitalWrite(red, LOW);
     left_motor -> setSpeed(150);
     right_motor -> setSpeed(150);
 
@@ -40,6 +46,8 @@ else if(left_sensor_value < 300 && right_sensor_value > 500){
 }
 
 else if(left_sensor_value > 500 && right_sensor_value < 300){
+      digitalWrite(yellow, LOW);
+    digitalWrite(red, HIGH);
     left_motor -> setSpeed(150);
     right_motor -> setSpeed(150);
 
@@ -50,6 +58,8 @@ else if(left_sensor_value > 500 && right_sensor_value < 300){
 }
 
 else{
+      digitalWrite(yellow, HIGH);
+    digitalWrite(red, HIGH);
     left_motor -> setSpeed(100);
     right_motor -> setSpeed(100);
 
