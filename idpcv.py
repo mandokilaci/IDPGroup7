@@ -88,7 +88,7 @@ class Image:
 
 
 
-'''
+
 
 def visualize(file_name):
     """Purely for testing and visualization. 
@@ -109,7 +109,7 @@ def visualize(file_name):
     ax.set_xlim(0,image.shape[1])
     ax.set_ylim(-image.shape[0],0)
     plt.show()
-'''
+
 
 def send_centers(sock, centers):
     """Send coordinates of blocks' centers to Arduino"""
@@ -123,7 +123,7 @@ def send_centers(sock, centers):
 def receive_data(sock):
     """Receives data from the Arduino and only breaks out of this when
     b'Connection established' is received"""
-    
+
     while True:
         data, addr = sock.recvfrom(1024)  # buffer size of 1024 bytes
         print(data)
@@ -132,16 +132,10 @@ def receive_data(sock):
 
 
 
-    
-
-    
-        
-
-if __name__ == '__main__':
-
+def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((IP_ADDR, UDP_PORT))
-    receive_data(sock)
+    #receive_data(sock)
 
     img = Image()
     img.process_image(reference_RGB = [230,50,80], tolerance_value =  100)
@@ -150,6 +144,9 @@ if __name__ == '__main__':
     send_centers(sock, centers)
 
     img.shutdown()
+
+main()
+
 
 
 
