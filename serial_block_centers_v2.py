@@ -17,7 +17,7 @@ class Image:
         #self.img = src
         #self.shape = src.shape
         self.centers = []
-        #self.robot_center = []
+        self.robot_center = []
 
         print('Initialising camera')
         self.cap = cv2.VideoCapture('http://localhost:8081/stream/video.mjpeg')
@@ -91,12 +91,11 @@ class Image:
 
         return img
 
-    """def get_robot_center(self, frame, minArea = 30, threshold_val = 100):
-        #Appends the centers of green contour, which correspond to the robot's center, to self.robot_centers
-        and returns image with bounding box drawn
+    def get_robot_center(self, frame, threshold_val = 100):
+        """Appends the center of green contour, which correspond to the robot's center, to self.robot_center
+        and returns image with contour drawn"""
         
         #frame = cv2.imread('2Capture2.png')
-
 
         # Convert BGR to HSV
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -117,21 +116,15 @@ class Image:
         _, contours, _ = cv2.findContours(thrshed, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
 
-
-        #Retain suitable contours that are larger than minimum area and of the right dimensions
-        for i in range(len(contours)):
-            # Contour area is taken
-            #area = cv2.contourArea(contours[i])
-            (x, y, w, h) = cv2.boundingRect(contours[i])
-            if w*h > minArea and w < 40 and h < 40:
-                (x, y, w, h) = cv2.boundingRect(contours[j])
-                img = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                x_c = x + w*0.5
-                y_c = y + h*0.5
-                self.robot_center.append((x_c,y_c))
-                
-
-        return img"""
+        green_contours = sorted(contours, key=cv2.contourArea)
+        robot_contour = green_contours[-1]  #Assumes that robot contour is the largest green contour
+        M = cv2.moments(robot_contour)
+        x_c = int(M["m10"] / M["m00"])
+        y_c = int(M["m01"] / M["m00"])
+        self.robot_center.append((x_c,y_c))
+        img = cv2.drawContours(frame, robot_contour, -1, (255, 0, 0), 2)
+        
+        return img
 
 
     def capture(self):
@@ -151,7 +144,8 @@ class Image:
         """Captures image frame and performs image processing"""
 
         frame = self.capture()
-        img = self.get_block_centers(frame, minArea, threshold_val)
+        block_img = self.get_block_centers(frame, minArea, threshold_val)
+        robot_img = self.get_robot_center(frame, threshold_val)
         #self.show_frame(img)
 
     def shutdown(self):
@@ -169,6 +163,15 @@ def send_centers(sock, centers):
         message = str(coordinate)
         print(message)
         sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
+
+def send_robot_center(sock, robot_center):
+    """Send coordinates of robot center to Arduino"""
+
+    time.sleep(0.1)
+    message = "r" + str(robot_center)
+    print(message)
+    sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
+
 
 class ReceiveThread (threading.Thread):
    def __init__(self, threadID, name, sock):
@@ -195,6 +198,9 @@ class CvThread (threading.Thread):
       centers = img.centers
       print(centers)
       send_centers(self.socket, centers)
+      robot_center = img.robot_center
+      print("r"+str(robot_center))
+      send_robot_center(self.socket, robot_center)
       img.shutdown()
       print("Ending " + self.name)
 
